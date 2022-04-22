@@ -1,0 +1,129 @@
+<?php
+
+$link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] 
+=== 'on' ? "https" : "http") . 
+"://" . $_SERVER['HTTP_HOST'] . 
+$_SERVER['REQUEST_URI'];
+
+
+$url = $link;
+
+// Use parse_url() function to parse the URL 
+// and return an associative array which 
+// contains its various components 
+$url_components = parse_url($url);
+
+// Use parse_str() function to parse the 
+// string passed via URL 
+parse_str($url_components['query'], $params);
+
+// Display result 
+
+$servername = "localhost";
+$username = "root";
+$password = "12345678";
+$dbname="test";
+// Create connection
+$conn = new mysqli($servername, $username, $password);
+
+$conn->select_db("$dbname");
+
+// Check connection
+if ($conn->connect_error) {
+  die("Connection failed: " . $conn->connect_error);
+}
+
+echo "Connected Successfully! <br>";
+
+$phone = $params["phone"];
+
+$sql="Delete from users where phone='$phone'";
+
+if($conn->query($sql)) {
+    echo '<br><div style="color:green;">Xóa thành công người dùng!</div>';
+} else {
+    echo '<br><div style="color:red;">Xóa dữ liệu thất bại!!</div>' . $conn->error;
+}
+
+$conn->close();
+?>
+
+-------------------------------------
+<?php
+
+$servername = "localhost";
+$username = "root";
+$password = "12345678";
+$dbname="test";
+// Create connection
+$conn = new mysqli($servername, $username, $password);
+
+$conn->select_db("$dbname");
+
+// Check connection
+if ($conn->connect_error) {
+  die("Connection failed: " . $conn->connect_error);
+}
+
+echo "Connected Successfully! <br>";
+
+$type ="";
+$fullname="";
+$country ="";
+$addrress="";
+$city="";
+$postcode="";
+$phone="";
+
+if(isset($_POST["phone"])  && isset($_POST["type"]) && isset($_POST["fullname"]))
+{
+    $type =$_POST["type"];
+    $fullname=$_POST["fullname"];
+    $country =$_POST["country"];
+    $addrress=$_POST["address"];
+    $city=$_POST["city"];
+    $postcode=$_POST["postcode"];
+    $phone=$_POST["phone"];
+    $sql = "SELECT * FROM users where phone='$phone'";
+    $result = $conn->query($sql);
+    if($result->num_rows>0) {
+        echo '<br><div style="color:red">Đã tồn tại số điện thoại!</div>';
+    } else {
+        $sql1 = "insert into users values('$type','$fullname','$phone')";
+        if($conn->query($sql1)) {
+            echo '<br><div style="color:green;">Chúc mừng bạn chèn dữ liệu thành công</div>';
+
+        } else {
+            echo '<br><div style="color:red;">Chèn dữ liệu thất bại</div>' . $conn->error;
+        }
+    }
+}
+
+?>
+
+<table border="1">
+    <th>
+        <tr>
+            <td>Full name</td>
+            <td>Phone</td>
+            <td>Type Account</td>
+            <td>Xóa</td>
+        </tr>
+    </th>
+    <tbody>
+    <?php
+        $sql2 = "SELECT * FROM USERS";
+        $rs = $conn->query($sql2);
+        if($rs->num_rows>0) {
+            while($row = $rs->fetch_assoc()) {
+                $fullname= $row["fullname"];
+                $phone = $row["phone"];
+                $type = $row["type"];
+                $url = "http://localhost/LeManhCuong/phpHaui/bt/delete.php?phone=" . $phone;
+                echo "<tr>"."<td>".$fullname ."</td>" ."<td>".$phone ."</td>" ."<td>".$type ."</td>" ."<td><a href=".$url.">Xóa</a>"."</td>" ."</tr>";
+            }
+        }
+        $conn->close();
+    ?>
+    </tbody>
+</table>
